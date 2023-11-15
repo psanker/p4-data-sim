@@ -1,0 +1,25 @@
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{units}
+\usepackage{tikz}
+\usepackage{bm}
+\usepackage{caption}
+\usepackage{floatrow}
+\usepackage{graphicx}
+\usepackage{subcaption}
+
+\renewcommand{\topfraction}{.85}
+\renewcommand{\bottomfraction}{.7}
+\renewcommand{\textfraction}{.15}
+\renewcommand{\floatpagefraction}{.66}
+\setcounter{topnumber}{3}
+\setcounter{bottomnumber}{3}
+\setcounter{totalnumber}{4}
+
+\DeclareNewFloatType{chunk}{placement=H, fileext=chk, name=}
+\captionsetup{options=chunk}
+\renewcommand{\thechunk}{Chunk~\arabic{chunk}}
+\makeatletter
+\@addtoreset{chunk}{section}
+\makeatother
+

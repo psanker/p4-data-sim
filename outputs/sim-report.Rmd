@@ -1,0 +1,29 @@
+---
+title: "Simulation of Data for ECW Workshop"
+date: "`r strftime(Sys.Date(), format = '%Y-%m-%d')`"
+author: Patrick Anker
+bibliography: references.bib
+nocite: "@*"
+output: 
+  bookdown::pdf_document2:
+    pandoc_args: ['-F', 'zotref.py', '--citeproc']
+    includes:
+      in_header: "preamble.tex"
+    toc: false
+    extra_dependencies: "float"
+    number_sections: true
+    citation_package: biblatex
+---
+
+# Methods
+
+Simulated data are created via a Bayesian network using a heuristic causal DAG from the expected latent factor structure and a measurement model. The Bayesian factor structure follows the canonical psychometric model in @2GTWV566#Levy_Mislevy_2016. The model is provided in \@ref(eq:model). Let $i$ correspond to the observation number (each participant), and $j$ represent the $j^{\text{th}}$ observable in the factor model.
+
+\begin{align}\label{eq:model}
+\begin{split}
+x_{ij}&\sim\mathrm{OrderedLogit}(\phi_{ij}, k_j) \\
+\phi_{ij}&\sim\mathrm{Normal}(\tau_j + f_{[\textsc{anx}]i}\lambda_j, \psi_{jj}) \\
+f_{[\textsc{anx}]i}&\sim\mathrm{Normal}(\beta_{[\textsc{int}]}f_{[\textsc{int}]i}, \sigma_{[\textsc{int}]}^2) \\
+f_{[\textsc{int}]i}&\sim\mathrm{Normal}\sim\mathrm{Normal}()
+\end{split}
+\end{align}
