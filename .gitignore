@@ -8,3 +8,6 @@
 ~$*.xls*
 ~$*.ppt*
 _targets
+
+# Report outputs
+*.pdf

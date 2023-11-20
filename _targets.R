@@ -56,13 +56,13 @@ rlang::list2(
     prepped_p4c6,
     raw_p4c6 |>
       tidytable::select(
-        # TODO: Get cohort definition from Carly
         cint1, cint2, cint4, cint11,
         cint19, cint21, cint22, cint23,
         cint24, cint27, cint28, cint29,
         cint30,
         cfemale = ccfemale,
-        ajobloss = acov2_2
+        ajobloss = acov2_2,
+        ccohort = cohort,
       ) |>
       tidytable::mutate(cycle = 6L)
   ),
@@ -75,7 +75,8 @@ rlang::list2(
         cint24, cint27, cint28, cint29,
         cint30,
         cfemale = ccfemale,
-        ajobloss = acov2_2
+        ajobloss = acov2_2,
+        ccohort = cohort,
       ) |>
       tidytable::mutate(cycle = 7L)
   ),
@@ -83,16 +84,48 @@ rlang::list2(
     prepped_c6c7,
     {
       out <- tidytable::bind_rows(prepped_p4c6, prepped_p4c7) |>
-        haven::zap_labels()
+        haven::zap_labels() |>
+        tidytable::mutate(
+          ccohort = tidytable::case_when(
+            ccohort %in% c(7, 9) ~ 0, # Urban
+            ccohort %in% c(8, 10) ~ 1, # Rural
+            TRUE ~ ccohort,
+          ),
+        )
 
       # Complete case analysis, although maybe I should keep
       # rows with at least some demographics
       out[complete.cases(out)]
     }
   ),
+  tar_target(
+    jittered_c6c7,
+    prepped_c6c7 |>
+      jitter_outcomes(.cols = tidyselect::starts_with("cint"), .threshold = 0.1)
+  ),
+
+  # ---- 2. Modeling ----
+  tar_target(
+    inp_kfa,
+    list(prepped_c6c7, jittered_c6c7)
+  ),
+  tar_target(inp_kfa_names, c("nojitter", "jitter")),
+  tar_target(
+    kfa_mod,
+    evaluate_kfa(inp_kfa),
+    pattern = map(inp_kfa)
+  ),
   # ---- N. Reporting ----
   tar_render(
     simulation_report,
     here::here("outputs/sim-report.Rmd")
   ),
+  tar_file(
+    kfa_report,
+    kfa::kfa_report(
+      kfa_mod,
+      file.path("outputs", paste0(inp_kfa_names, ".html"))
+    ),
+    pattern = map(kfa_mod, inp_kfa_names)
+  )
 )

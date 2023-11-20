@@ -17,13 +17,98 @@ output:
 
 # Methods
 
-Simulated data are created via a Bayesian network using a heuristic causal DAG from the expected latent factor structure and a measurement model. The Bayesian factor structure follows the canonical psychometric model in @2GTWV566#Levy_Mislevy_2016. The model is provided in \@ref(eq:model). Let $i$ correspond to the observation number (each participant), and $j$ represent the $j^{\text{th}}$ observable in the factor model.
+Simulated data are created via a Bayesian network using a heuristic causal DAG from the expected latent factor structure and a measurement model. The Bayesian factor structure follows the canonical psychometric model in @2GTWV566#Levy_Mislevy_2016. The model is provided in \@ref(eq:model). In addition, differential item functioning (DIF) is applied to each outcome, notated as $B$ in the model. Let $i$ correspond to the observation number (each participant), and $j$ represent the $j^{\text{th}}$ observable in the factor model.
 
 \begin{align}\label{eq:model}
 \begin{split}
-x_{ij}&\sim\mathrm{OrderedLogit}(\phi_{ij}, k_j) \\
-\phi_{ij}&\sim\mathrm{Normal}(\tau_j + f_{[\textsc{anx}]i}\lambda_j, \psi_{jj}) \\
-f_{[\textsc{anx}]i}&\sim\mathrm{Normal}(\beta_{[\textsc{int}]}f_{[\textsc{int}]i}, \sigma_{[\textsc{int}]}^2) \\
-f_{[\textsc{int}]i}&\sim\mathrm{Normal}\sim\mathrm{Normal}()
+X_{ij}&\sim\mathrm{OrderedLogit}(\phi_{ij}, \kappa_j) \\
+\kappa_j&\sim \mathrm{Norm}(0, 1.5) \\
+\boldsymbol{\phi}_{\textsc{anx}[i]}&\sim\mathrm{MVTNorm}(\boldsymbol{\tau}_{\textsc{anx}} + \Lambda_{\textsc{anx}}\mathbf{f}_{\textsc{anx}[i]} + B_{\textsc{anx}}(y_{P[i]}, y_{G[i]}, y_{C[i]})^T, \Sigma_{\textsc{anx}})\\
+\boldsymbol{\phi}_{\textsc{dep}[i]}&\sim\mathrm{MVTNorm}(\boldsymbol{\tau}_{\textsc{dep}} + \Lambda_{\textsc{dep}}\mathbf{f}_{\textsc{dep}[i]} + B_{\textsc{dep}}(y_{P[i]}, y_{G[i]}, y_{C[i]})^T, \Sigma_{\textsc{dep}})\\
+f_{\textsc{anx}[i]}&\sim\mathrm{Norm}(\beta_{\textsc{anx}}f_{\textsc{int}[i]}, \sigma_{\textsc{anx}}^2) \\
+f_{\textsc{dep}[i]}&\sim\mathrm{Norm}(\beta_{\textsc{dep}}f_{\textsc{int}[i]}, \sigma_{\textsc{dep}}^2) \\
+f_{\textsc{int}[i]}&\sim\mathrm{Norm}(\alpha + \beta_C y_{C[i]} + \beta_G y_{G[i]} + \beta_P y_{P[i]} + \beta_L y_{L[i]}, \sigma_{\textsc{int}}^2) \\
+(\alpha, \beta, \tau)&\sim\mathrm{Norm}(0, 1.5) \\
+\Lambda&\sim\mathrm{MVTNorm}(\mathbf{0}, \Sigma) \\
+\Sigma&\sim\mathrm{LKJCorr}(2) \\
+\sigma&\sim\mathrm{Exponential}(2)
 \end{split}
 \end{align}
+
+A visual representation of the causal DAG is shown
+
+```{r methods-f1, echo=FALSE, fig.align="center", fig.cap="Causal DAG with DIF", out.width="85%"}
+dag <- dagitty::dagitty('
+dag {
+bb="0,0,1,1"
+"Internalizing Behavior" [latent,pos="0.416,0.198"]
+"Parental Employment" [adjusted,pos="0.267,0.273"]
+Anxiety [latent,pos="0.129,0.153"]
+Cycle [exposure,pos="0.560,0.270"]
+Depression [latent,pos="0.752,0.159"]
+Gender [adjusted,pos="0.414,0.331"]
+Location [adjusted,pos="0.417,0.032"]
+cint1 [outcome,pos="0.524,0.604"]
+cint11 [outcome,pos="0.668,0.660"]
+cint19 [outcome,pos="0.052,0.569"]
+cint2 [outcome,pos="0.567,0.649"]
+cint21 [outcome,pos="0.099,0.633"]
+cint22 [outcome,pos="0.169,0.560"]
+cint23 [outcome,pos="0.245,0.633"]
+cint24 [outcome,pos="0.303,0.568"]
+cint27 [outcome,pos="0.723,0.594"]
+cint28 [outcome,pos="0.778,0.660"]
+cint29 [outcome,pos="0.816,0.600"]
+cint30 [outcome,pos="0.880,0.638"]
+cint4 [outcome,pos="0.622,0.589"]
+"Internalizing Behavior" -> Anxiety
+"Internalizing Behavior" -> Depression
+"Parental Employment" -> "Internalizing Behavior"
+"Parental Employment" -> cint19
+"Parental Employment" -> cint2
+"Parental Employment" -> cint24
+"Parental Employment" -> cint28
+Anxiety -> cint19
+Anxiety -> cint21
+Anxiety -> cint22
+Anxiety -> cint23
+Anxiety -> cint24
+Cycle -> "Internalizing Behavior"
+Cycle -> cint11
+Cycle -> cint21
+Cycle -> cint24
+Cycle -> cint27
+Cycle -> cint29
+Depression -> cint1
+Depression -> cint11
+Depression -> cint2
+Depression -> cint27
+Depression -> cint28
+Depression -> cint29
+Depression -> cint30
+Depression -> cint4
+Gender -> "Internalizing Behavior"
+Gender -> cint22
+Gender -> cint23
+Gender -> cint27
+Gender -> cint29
+Gender -> cint4
+Location -> "Internalizing Behavior"
+}
+') |>
+  ggdag::tidy_dagitty()
+
+ggdag::ggdag(dag) +
+  ggdag::geom_dag_point(
+    colour = "#ffffff",
+    stroke = 0.25
+  ) +
+  ggdag::geom_dag_text(colour = "black") +
+  ggdag::geom_dag_edges(
+    edge_colour = "#3a3a3a",
+    edge_alpha = 0.2,
+    edge_width = 0.25,
+  ) +
+  ggplot2::theme_void()
+```
+
