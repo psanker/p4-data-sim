@@ -1,5 +1,11 @@
-[submodule "data"]
-	path = data
-	url = ./data
-	datalad-id = 6e28c3f7-8a27-4039-b65f-e2de348ae8d8
+[submodule "data/raw"]
+	path = data/raw
+	url = git@gin.g-node.org:/nyuglobalties/peru-sel.nightly.git
+	datalad-id = d1bc44e3-7e42-4c86-aec4-95bb9920d2b7
 	datalad-url = git@gin.g-node.org:/nyuglobalties/peru-sel.nightly.git
+
+[submodule "data/exports"]
+	path = data/exports
+	url = git@gin.g-node.org:/nyuglobalties/peru-sel.exports.git
+	datalad-id = 49a8ae69-6b4b-420f-8008-3cca3312a02b
+	datalad-url = git@gin.g-node.org:/nyuglobalties/peru-sel.exports.git

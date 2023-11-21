@@ -16,6 +16,14 @@ datalad_raw_path <- function(...) {
   datalad_path("raw", ...)
 }
 
+#' Build path in the data/exports folder
+#'
+#' @param ... Path elements to be passsed to datalad_proj_path()
+#' @return The full absolute path
+datalad_exports_path <- function(...) {
+  datalad_path("exports", ...)
+}
+
 #' Build path in the data/nightly/[latest|snapshots] folder
 #'
 #' @param ... Path elements to be passsed to datalad_proj_path()

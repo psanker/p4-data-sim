@@ -115,6 +115,17 @@ rlang::list2(
     evaluate_kfa(inp_kfa),
     pattern = map(inp_kfa)
   ),
+
+  # ---- 3. Exports ----
+  tar_file(
+    jittered_c6c7_out,
+    {
+      path <- datalad_exports_path("p4-data-sim", "jittered.csv")
+      data.table::fwrite(jittered_c6c7, path)
+      path
+    }
+  ),
+
   # ---- N. Reporting ----
   tar_render(
     simulation_report,
